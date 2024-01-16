@@ -1,2 +1,3 @@
 # TSP-solution
-This repository shows a solution for the traveling salesman problem 🥓
+This repository shows three solutions for the Traveling Salesman Problem 🥓
+ Genetic Algorithm, Dinamic Programing and Backtracking.
