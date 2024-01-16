@@ -144,10 +144,10 @@ int main(){
     }
 
     // Print the best route
-    std::cout << "Genetico: ";
-    for (int i : bb.path) 
-        std::cout << i+1 << " ";
-    
+    std::cout << "Genetico : ";
+    for (int i ; i < bb.path.size()-1; i++) 
+        std::cout << bb.path[i]+1 << ", ";
+    std::cout << bb.path[nodos]+1;
     // Print the total distance of the best route
     std::cout << " Costo " << bestFitness << std::endl;
 
