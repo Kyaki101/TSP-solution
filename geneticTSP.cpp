@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 typedef long long ll;
-ll nodos, vertices, MAX_GEN = 200, population_size, dist[1000][1000]; double mutation_rate = 0.28;
+ll nodos, vertices, MAX_GEN = 200, population_size, dist[1000][1000];
+double mutation_rate = 0.28;
 
 struct Route{
     std::vector<ll> path;
@@ -10,12 +11,63 @@ struct Route{
 
 
 
+/* bool isValidRoute(Route route, ll dist[][1000]){
+    if(route.path.empty()==true) return false;
+    for(int i = 0; i < nodos; i++){
+        //std::cout<<i<<' '<< i+1<< ':'<<dist[route.path[i]][route.path[i+1]]<<'\n';
+        if(dist[route.path[i]][route.path[i+1]] >= 1000000)
+            return false;
+    }
+    return true;
+}
+
+
+Route randRoute2(){
+    Route route;
+    for (int i = 0; i < nodos; i++){
+        route.path.push_back(i);}
+    random_shuffle(route.path.begin(), route.path.end());
+    route.path.push_back(route.path[0]);
+    return route;
+}
+ */
+
+/* Route newRandomRoute(ll dist[][1000]){
+    std::bitset<1000> vis;
+    Route route;
+    ll cantNodos = 0;
+    ll rand3;
+    while(cantNodos < nodos+1){
+
+        ll rand1 = rand() % nodos;
+        ll rand2 = rand() % nodos; 
+        ll rand3 = rand() % nodos;
+        //std::cout<<'\n'<<rand3<<'-'<<vis[rand3];
+        if(dist[rand2][rand3] < 1000000 && vis[rand3]==0){
+            vis[rand3]=1;
+            route.path.push_back(rand3);
+            cantNodos++;
+            rand2 = rand3;
+        }
+
+        route.path.push_back(route.path[0]);
+    }
+    std::cout<<"random = ";
+    for(int i: route.path) std::cout<<i+1<<' ';
+    std::cout<<'\n';
+    return route;
+} */
+
+
 Route newRandomRoute(){
     Route route;
     for (int i = 0; i < nodos; i++)
         route.path.push_back(i);
     random_shuffle(route.path.begin(), route.path.end());
     route.path.push_back(route.path[0]);
+    // std::cout<<"random = ";
+    // for(int i: route.path) std::cout<<i+1<<' ';
+    // std::cout<<'\n';
     return route;
 }
 
@@ -70,6 +122,9 @@ Route crossover(const Route& parent1, Route& parent2) {
                     break;
                 }
     child.path.push_back(child.path[0]);
+    // std::cout<<"crossover = ";
+    // for(int i: child.path) std::cout<<i<<' ';
+    // std::cout<<'\n';
     return child;
 }
 
@@ -95,14 +150,16 @@ void mutate(Route& route) {
 
 int main(){
     std::cin>>nodos>>vertices;
-    memset(dist, 100000, sizeof dist);
-    population_size = nodos*nodos;
+    for(int i = 0; i < nodos+10; i++)
+        for(int j =0; j <  nodos+10; j++)
+            dist[i][j] = INT_MAX;
     // uso 0 para las dist o un num grande?
+    population_size = nodos*nodos;
+    if((population_size % 2) != 0) population_size --; 
     while(vertices--){
         ll t1,t2,t;
         std::cin>>t1>>t2>>t;
-        dist[t1-1][t2-1] = t;
-        dist[t2-1][t1-1] = t;
+        dist[t1-1][t2-1] = dist[t2-1][t1-1] = t;
     }
 
     // Generate the first population 
@@ -115,10 +172,11 @@ int main(){
     ll bestFitness = LONG_MAX;
     Route bb;
     // Iniciate the Genetic Algorithm
-    for (int gen = 0; gen < 300; gen++) {
+    int max_gen = (nodos<7)? 500: nodos*nodos*13;
+    for (int gen = 0; gen < max_gen; gen++) {
         std::vector<Route> newPopulation;
-
-        for (ll i = 0; i < population_size/2; i++) {
+        int tam = population_size/2;
+        for (ll i = 0; i < tam; i++) {
             std::pair<Route, int> parent1 = bestRoute(population);
             // Erase the first best parent so it its not again in the generation
             population.erase(std::next(population.begin(), parent1.second));
@@ -130,15 +188,15 @@ int main(){
             calculateFitness(child, dist);
             newPopulation.push_back(child);
             // Save to have the best child
-            if(child.distTotal < bestFitness){bestFitness = child.distTotal; bb = child;}
+            if(child.distTotal>0 && child.distTotal < bestFitness){bestFitness = child.distTotal; bb = child;}
             // Mutate it
             mutate(child);
             // Calculate its fitness
             calculateFitness(child, dist);
             newPopulation.push_back(child);
             // Save to have the best child again
-            if(child.distTotal < bestFitness){bestFitness = child.distTotal;bb = child;}
-        }
+            if(child.distTotal>0 && child.distTotal < bestFitness){bestFitness = child.distTotal;bb = child;}
+         }
         //replace the old population with the new population
         population = newPopulation;
     }
